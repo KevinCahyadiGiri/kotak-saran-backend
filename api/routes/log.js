@@ -56,19 +56,44 @@ router.post('/', (req, res, next) => {
     }
 
     async function pay() {
+        var lastOut = null;
         const doc = new GoogleSpreadsheet('1L3bcBB3_1hGXIG7CoBxWnDB98CcTo2dNmQnN6Kuo6vc');
         await promisify(doc.useServiceAccountAuth)(creds);
         const info = await promisify(doc.getInfo)();
-        const sheet = info.worksheets[1];
-        const rows = await promisify(sheet.getRows)({
+        var sheet = info.worksheets[0];
+        var rows = await promisify(sheet.getRows)({
+            query: `nim = ${req.body.nim}`
+        })
+        rows = rows.filter(val => {return val.status = 'masuk'});
+        lastOut = rows[rows.length-1].waktu;
+
+        sheet = info.worksheets[1];
+        rows = await promisify(sheet.getRows)({
             query: `nim = ${req.body.nim}`
         })
         rows.forEach(row => {
-            if (row.saldo < 2000) {
+            var biaya = 0;
+            var before = new Date(lastOut);
+            var after = new Date();
+            var selisihBeforeAfter = after - before;
+            var selisihBeforeMidnight = 86400000 - (before % 86400000);
+            if (selisihBeforeAfter < selisihBeforeMidnight) {
+                biaya = 2000;
+            }
+            else {
+                var passMidnight = 1;
+                var sisa = selisihBeforeAfter - selisihBeforeMidnight;
+                sisa = sisa / 86400000;
+                sisa = Math.floor(sisa);
+                passMidnight = passMidnight + sisa;
+                biaya = 2000*passMidnight;
+            }
+
+            if (row.saldo < biaya) {
                 paymentSucces = false;
             } 
             else {
-                row.saldo = row.saldo - 2000;
+                row.saldo = row.saldo - biaya;
                 row.save();
             }
         })
