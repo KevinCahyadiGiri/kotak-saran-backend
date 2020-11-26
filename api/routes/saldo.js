@@ -58,7 +58,7 @@ router.get('/:nim', (req, res, next) => {
     accessSpreadsheet()
 })
 
-router.post('/:nim', (req, res, next) => {
+router.put('/:nim', (req, res, next) => {
     const nim = req.params.nim;
 
     async function accessSpreadsheet() {
@@ -73,7 +73,7 @@ router.post('/:nim', (req, res, next) => {
             row.saldo = parseInt(row.saldo) + parseInt(req.body.topup);
             row.save();
         })
-        res.status(201).json({
+        res.status(200).json({
             message: `Menambah saldo mahasiswa dengan nim ${nim} sebesar ${req.body.topup}`
         })
     }

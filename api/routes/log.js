@@ -103,6 +103,7 @@ router.get('/:nim', (req, res, next) => {
     const nim = req.params.nim;
 
     async function accessSpreadsheet() {
+        // connect ke db
         const doc = new GoogleSpreadsheet('1L3bcBB3_1hGXIG7CoBxWnDB98CcTo2dNmQnN6Kuo6vc');
         await promisify(doc.useServiceAccountAuth)(creds);
         const info = await promisify(doc.getInfo)();
@@ -110,6 +111,8 @@ router.get('/:nim', (req, res, next) => {
         const rows = await promisify(sheet.getRows)({
             query: `nim = ${nim}`
         })
+
+        // iterasi setiap row
         rows.forEach(row => {
             var rowJSON = {};
             rowJSON['nim'] = row.nim;
@@ -119,6 +122,8 @@ router.get('/:nim', (req, res, next) => {
             rowJSON['parkiran'] = row.parkiran;
             dataSend.push(rowJSON)
         })
+
+        // kasi response
         res.status(201).json({
             message: `Hasil pencarian mahasiswa dengan nim ${nim}`,
             data: dataSend
