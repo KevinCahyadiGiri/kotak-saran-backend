@@ -6,7 +6,15 @@ const bodyParser = require('body-parser');
 const loginRoutes = require('./api/routes/login');
 
 
-app.use(morgan('dev'));
+app.use(morgan(function (tokens, req, res) {
+    return [
+        tokens.method(req, res),
+        tokens.url(req, res), 
+        tokens.status(req, res), 
+        tokens.res(req, res, 'content-length'),
+        tokens['response-time'](req, res)
+    ].join(' ')
+}));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 

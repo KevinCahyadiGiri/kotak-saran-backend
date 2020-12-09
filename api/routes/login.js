@@ -1,7 +1,17 @@
 const express = require('express');
 const router = express.Router();
+// const dotenv = require('dotenv')
 const {OAuth2Client} = require('google-auth-library');
+const { Client } = require('pg');
 
+// dotenv.config({path: '../../.env'});
+
+const pgClient = new Client({
+    connectionString: `${process.env.DATABASE_URL}`,
+    ssl: {
+        rejectUnauthorized: false
+    }
+})
 
 router.post('/', async (req, res, next) => {   
     const token = req.body.idToken;
@@ -19,6 +29,14 @@ router.post('/', async (req, res, next) => {
     uid = payload['sub'];
     name = payload['name'];
     email = payload['email'];
+    pgClient.connect();
+    pgClient.query('select * from users;', (err, res) => {
+        if (err) throw err;
+        for (let row of res.rows) {
+            console.log(JSON.stringify(row))
+        }
+        pgClient.end();
+    })
     res.status(201).json({
         uid: uid,
         name: name,
