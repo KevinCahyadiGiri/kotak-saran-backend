@@ -3,8 +3,7 @@ const app = express();
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 
-const logRoutes = require('./api/routes/log');
-const saldoRoutes = require('./api/routes/saldo');
+const loginRoutes = require('./api/routes/login');
 
 
 app.use(morgan('dev'));
@@ -24,8 +23,7 @@ app.use((req,res,next) => {
     next();
 })
 
-app.use('/log', logRoutes);
-app.use('/saldo', saldoRoutes);
+app.use('/login', loginRoutes);
 
 app.use((req,res,next) => {
     const error = new Error('Not Found');
