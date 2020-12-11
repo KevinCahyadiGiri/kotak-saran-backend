@@ -7,7 +7,9 @@ const { Client } = require('pg');
 // dotenv.config({path: '../../.env'});
 
 const pgClient = new Client({
-    connectionString: `${process.env.DATABASE_URL}`,
+    // connectionString: 'postgres://rbtkrlxjnzaeuq:4cb9d21bbce937f8af1ba57fa852862e6694dc15a2f23165adc23f05bf07619b@ec2-75-101-212-64.compute-1.amazonaws.com:5432/d68fbtjjo9ii71',
+    connectionString: process.env.DATABASE_URL || 'postgres://rbtkrlxjnzaeuq:4cb9d21bbce937f8af1ba57fa852862e6694dc15a2f23165adc23f05bf07619b@ec2-75-101-212-64.compute-1.amazonaws.com:5432/d68fbtjjo9ii71',
+    // connectionString: process.env.DATABASE_URL,
     ssl: {
         rejectUnauthorized: false
     }
@@ -29,18 +31,15 @@ router.post('/', async (req, res, next) => {
     uid = payload['sub'];
     name = payload['name'];
     email = payload['email'];
-    pgClient.connect();
-    pgClient.query('select * from users;', (err, res) => {
-        if (err) throw err;
-        for (let row of res.rows) {
-            console.log(JSON.stringify(row))
-        }
-        pgClient.end();
-    })
     res.status(201).json({
         uid: uid,
         name: name,
         email: email
+    })
+    pgClient.connect();
+    pgClient.query(`insert into users values('${uid}', '${name}', '${email}') on conflict do nothing;`, (err, res) => {
+        if (err) throw err;
+        if (res) {};
     })
 })
 
